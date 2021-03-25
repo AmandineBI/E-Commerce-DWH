@@ -7,16 +7,8 @@ FROM bec.stg.olist_orders_dataset o
 LEFT OUTER JOIN bec.stg.olist_order_items_dataset i ON o.order_id = i.order_id 
 LEFT OUTER JOIN bec.stg.olist_customers_dataset c ON o.customer_id = c.customer_id;
 
-/*Geolocation - bad*/
-DROP TABLE IF EXISTS bec.ods.geolocation; CREATE TABLE bec.ods.geolocation (zip_code_prefix int, city varchar(40), state varchar(2), latitud decimal(18,15), longitud decimal(18,15));
-INSERT INTO bec.ods.geolocation
-SELECT geolocation_zip_code_prefix, MAX(LTRIM(INITCAP(REPLACE(CASE WHEN geolocation_city < 6000 THEN 'são paulo' WHEN geolocation_city BETWEEN 6000 AND 6299 THEN 'osasco' WHEN geolocation_zip_code_prefix BETWEEN 6300 AND THEN 'carapicuíba' WHEN geolocation_zip_code_prefix BETWEEN 6500 AND 6545 THEN 'santana de parnaíba' WHEN geolocation_zip_code_prefix BETWEEN 6750 AND 6800 THEN 'taboão da serra' WHEN geolocation_zip_code_prefix BETWEEN 6801 AND 6849 THEN 'embu das artes' WHEN geolocation_zip_code_prefix BETWEEN 7000 AND 7299 THEN 'guarulhos' WHEN geolocation_zip_code_prefix BETWEEN 7400 AND 7449 THEN 'arujá' WHEN geolocation_zip_code_prefix BETWEEN 7700 AND 7749 THEN 'caieiras' WHEN geolocation_zip_code_prefix BETWEEN 7750 AND 7799 THEN 'cajamar' WHEN geolocation_zip_code_prefix BETWEEN 8000 AND 8499 THEN 'são paulo' WHEN geolocation_zip_code_prefix BETWEEN 8500 AND 8549 THEN 'ferraz de vasconcelos' WHEN geolocation_zip_code_prefix BETWEEN 8700 AND 8899 THEN 'mogi das cruzes' WHEN geolocation_zip_code_prefix BETWEEN 9500 AND 9599 THEN 'são caetano do sul' etc. etc. etc. etc. etc. etc. etc......END), 'sao ', 'são '))), 
-INITCAP(MAX(geolocation_state)), MIN(geolocation_lat), MIN(geolocation_lng) 
-FROM bec.stg.olist_geolocation_dataset 
-GROUP BY geolocation_zip_code_prefix;
-
-/*Geolocation - Good*/
-/*Algoritmo city: we take the city with the highest representation. Zip Codes per 50 inside of same city. Accent after normal letter.*/
+/*Geolocation */
+/*Logic: we take the city with the highest representation. Zip Codes per 50 inside of same city.*/
 DROP TABLE IF EXISTS bec.ods.geolocation; CREATE TABLE bec.ods.geolocation (zip_code_prefix int SORTKEY, city varchar(40), state varchar(2), latitud decimal(18,15), longitud decimal(18,15));
 INSERT INTO bec.ods.geolocation
 SELECT geo.geolocation_zip_code_prefix, query.city, geo.state, geo.latitud, geo.longitud 
